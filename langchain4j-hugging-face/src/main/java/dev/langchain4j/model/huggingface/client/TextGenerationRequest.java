@@ -1,14 +1,21 @@
 package dev.langchain4j.model.huggingface.client;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
 import static dev.langchain4j.internal.Utils.quoted;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TextGenerationRequest {
 
-    private final String inputs;
-    private final Parameters parameters;
-    private final Options options;
+    private String inputs;
+    private Parameters parameters;
+    private Options options;
 
     TextGenerationRequest(Builder builder) {
         this.inputs = builder.inputs;

@@ -1,11 +1,22 @@
 package dev.langchain4j.model.huggingface.client;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(NON_NULL)
 public class Options {
 
-    private final Boolean waitForModel;
-    private final Boolean useCache;
+    private Boolean waitForModel;
+    private Boolean useCache;
 
     Options(Builder builder) {
         this.waitForModel = builder.waitForModel;

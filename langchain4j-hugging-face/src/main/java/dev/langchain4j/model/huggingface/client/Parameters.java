@@ -1,18 +1,29 @@
 package dev.langchain4j.model.huggingface.client;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
 public class Parameters {
 
-    private final Integer topK;
-    private final Double topP;
-    private final Double temperature;
-    private final Double repetitionPenalty;
-    private final Integer maxNewTokens;
-    private final Double maxTime;
-    private final Boolean returnFullText;
-    private final Integer numReturnSequences;
-    private final Boolean doSample;
+    private Integer topK;
+    private Double topP;
+    private Double temperature;
+    private Double repetitionPenalty;
+    private Integer maxNewTokens;
+    private Double maxTime;
+    private Boolean returnFullText;
+    private Integer numReturnSequences;
+    private Boolean doSample;
 
     public Parameters(Builder builder) {
         this.topK = builder.topK;

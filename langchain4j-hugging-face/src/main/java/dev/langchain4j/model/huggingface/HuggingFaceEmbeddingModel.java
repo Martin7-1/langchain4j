@@ -5,6 +5,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.huggingface.client.EmbeddingRequest;
 import dev.langchain4j.model.huggingface.client.HuggingFaceClient;
+import dev.langchain4j.model.huggingface.client.Options;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceClientFactory;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceEmbeddingModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
@@ -60,7 +61,9 @@ public class HuggingFaceEmbeddingModel implements EmbeddingModel {
 
     private Response<List<Embedding>> embedTexts(List<String> texts) {
 
-        EmbeddingRequest request = new EmbeddingRequest(texts, waitForModel);
+        EmbeddingRequest request = new EmbeddingRequest(texts, Options.builder()
+                .waitForModel(waitForModel)
+                .build());
 
         List<float[]> response = client.embed(request);
 

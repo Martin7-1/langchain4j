@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HuggingFaceLanguageModelIT {
 
     @Test
-    public void should_send_prompt_and_receive_response() {
+    void should_send_prompt_and_receive_response() {
 
         HuggingFaceLanguageModel model = HuggingFaceLanguageModel.builder()
                 .accessToken(System.getenv("HF_API_KEY"))
@@ -31,7 +31,7 @@ class HuggingFaceLanguageModelIT {
 
     @ParameterizedTest
     @NullAndEmptySource
-    public void should_fail_when_access_token_is_null_or_empty(String accessToken) {
+    void should_fail_when_access_token_is_null_or_empty(String accessToken) {
 
         assertThatThrownBy(() -> HuggingFaceLanguageModel.withAccessToken(accessToken))
                 .isExactlyInstanceOf(IllegalArgumentException.class)

@@ -1,25 +1,20 @@
 package dev.langchain4j.model.huggingface.client;
 
-import dev.langchain4j.model.huggingface.client.Options;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(NON_NULL)
 public class EmbeddingRequest {
 
-    private final List<String> inputs;
-    private final Options options;
-
-    public EmbeddingRequest(List<String> inputs, boolean waitForModel) {
-        this.inputs = inputs;
-        this.options = Options.builder()
-                .waitForModel(waitForModel)
-                .build();
-    }
-
-    public List<String> getInputs() {
-        return inputs;
-    }
-
-    public Options getOptions() {
-        return options;
-    }
+    private List<String> inputs;
+    private Options options;
 }
