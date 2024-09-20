@@ -8,7 +8,6 @@ import dev.langchain4j.model.huggingface.client.HuggingFaceClient;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceClientFactory;
 import dev.langchain4j.model.huggingface.spi.HuggingFaceEmbeddingModelBuilderFactory;
 import dev.langchain4j.model.output.Response;
-import lombok.Builder;
 
 import java.time.Duration;
 import java.util.List;
@@ -25,7 +24,6 @@ public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
     private final boolean waitForModel;
     private final String modelId;
 
-    @Builder
     public HuggingFaceEmbeddingModel(String accessToken, String modelId, Boolean waitForModel, Duration timeout) {
         if (accessToken == null || accessToken.trim().isEmpty()) {
             throw new IllegalArgumentException("HuggingFace access token must be defined. It can be generated here: https://huggingface.co/settings/tokens");
@@ -85,9 +83,39 @@ public class HuggingFaceEmbeddingModel extends DimensionAwareEmbeddingModel {
     }
 
     public static class HuggingFaceEmbeddingModelBuilder {
+
+        private String accessToken;
+        private String modelId;
+        private Boolean waitForModel;
+        private Duration timeout;
+
         public HuggingFaceEmbeddingModelBuilder() {
             // This is public so it can be extended
             // By default with Lombok it becomes package private
+        }
+
+        public HuggingFaceEmbeddingModelBuilder accessToken(String accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
+
+        public HuggingFaceEmbeddingModelBuilder modelId(String modelId) {
+            this.modelId = modelId;
+            return this;
+        }
+
+        public HuggingFaceEmbeddingModelBuilder waitForModel(Boolean waitForModel) {
+            this.waitForModel = waitForModel;
+            return this;
+        }
+
+        public HuggingFaceEmbeddingModelBuilder timeout(Duration timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        public HuggingFaceEmbeddingModel build() {
+            return new HuggingFaceEmbeddingModel(accessToken, modelId, waitForModel, timeout);
         }
     }
 }
