@@ -28,7 +28,7 @@
 
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
+            <artifactId>converter-jackson</artifactId>
         </dependency>
 
         <!-- DEPENDENCY CONFLICT RESOLUTION FOR OKHTTP (START) -->
@@ -100,6 +100,7 @@
             <artifactId>tinylog-impl</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>slf4j-tinylog</artifactId>
