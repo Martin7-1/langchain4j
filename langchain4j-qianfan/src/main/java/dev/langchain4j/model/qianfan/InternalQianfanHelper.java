@@ -4,22 +4,17 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolParameters;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.*;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.internal.Utils;
-import dev.langchain4j.model.qianfan.client.embedding.EmbeddingResponse;
-import dev.langchain4j.model.qianfan.client.chat.Parameters;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
-import dev.langchain4j.model.qianfan.client.chat.ChatCompletionResponse;
-import dev.langchain4j.model.qianfan.client.chat.Message;
-import dev.langchain4j.model.qianfan.client.chat.Role;
-import dev.langchain4j.model.qianfan.client.chat.FunctionCall;
-import dev.langchain4j.model.qianfan.client.chat.Function;
+import dev.langchain4j.model.qianfan.client.chat.*;
 import dev.langchain4j.model.qianfan.client.completion.CompletionResponse;
+import dev.langchain4j.model.qianfan.client.embedding.EmbeddingResponse;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import static dev.langchain4j.data.message.AiMessage.aiMessage;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
 import static dev.langchain4j.model.output.FinishReason.*;
@@ -50,6 +45,7 @@ public class InternalQianfanHelper {
                 .required(toolParameters.required())
                 .build();
     }
+
     public static Message toQianfanMessage(ChatMessage message) {
 
         if (message instanceof UserMessage) {
@@ -66,7 +62,7 @@ public class InternalQianfanHelper {
 
             if (!aiMessage.hasToolExecutionRequests()) {
 
-                return  Message.builder()
+                return Message.builder()
                         .content(message.text())
                         .role(Role.ASSISTANT)
                         .build();
@@ -90,30 +86,31 @@ public class InternalQianfanHelper {
         if (message instanceof ToolExecutionResultMessage) {
             ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage) message;
 
-                FunctionCall functionCall = FunctionCall.builder()
-                        .name(toolExecutionResultMessage.toolName())
-                        .arguments(toolExecutionResultMessage.text())
-                        .build();
-                return  Message.builder()
-                        .content(message.text())
-                        .role(Role.FUNCTION)
-                        .name(functionCall.name())
-                        .build();
+            FunctionCall functionCall = FunctionCall.builder()
+                    .name(toolExecutionResultMessage.toolName())
+                    .arguments(toolExecutionResultMessage.text())
+                    .build();
+            return Message.builder()
+                    .content(message.text())
+                    .role(Role.FUNCTION)
+                    .name(functionCall.getName())
+                    .build();
 
         }
         throw illegalArgument("Unknown message type: " + message.type());
     }
+
     static TokenUsage tokenUsageFrom(ChatCompletionResponse response) {
         return Optional.of(response)
                 .map(ChatCompletionResponse::getUsage)
-                .map(usage -> new TokenUsage(usage.promptTokens(), usage.completionTokens(), usage.totalTokens()))
+                .map(usage -> new TokenUsage(usage.getPromptTokens(), usage.getCompletionTokens(), usage.getTotalTokens()))
                 .orElse(null);
     }
 
     static TokenUsage tokenUsageFrom(CompletionResponse response) {
         return Optional.of(response)
                 .map(CompletionResponse::getUsage)
-                .map(usage -> new TokenUsage(usage.promptTokens(), usage.completionTokens(), usage.totalTokens()))
+                .map(usage -> new TokenUsage(usage.getPromptTokens(), usage.getCompletionTokens(), usage.getTotalTokens()))
                 .orElse(null);
     }
 
@@ -121,14 +118,14 @@ public class InternalQianfanHelper {
     static TokenUsage tokenUsageFrom(EmbeddingResponse response) {
         return Optional.of(response)
                 .map(EmbeddingResponse::getUsage)
-                .map(usage -> new TokenUsage(usage.promptTokens(), usage.completionTokens(), usage.totalTokens()))
+                .map(usage -> new TokenUsage(usage.getPromptTokens(), usage.getCompletionTokens(), usage.getTotalTokens()))
                 .orElse(null);
     }
 
 
     public static FinishReason finishReasonFrom(String finishReason) {
 
-        if(Utils.isNullOrBlank(finishReason)){
+        if (Utils.isNullOrBlank(finishReason)) {
             return null;
         }
 
@@ -147,14 +144,15 @@ public class InternalQianfanHelper {
                 return null;
         }
     }
+
     public static AiMessage aiMessageFrom(ChatCompletionResponse response) {
 
         FunctionCall functionCall = response.getFunctionCall();
 
         if (functionCall != null) {
             ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                    .name(functionCall.name())
-                    .arguments(functionCall.arguments())
+                    .name(functionCall.getName())
+                    .arguments(functionCall.getArguments())
                     .build();
             return aiMessage(toolExecutionRequest);
         }
@@ -171,21 +169,22 @@ public class InternalQianfanHelper {
             throw new RuntimeException("Multiple system messages are not supported");
         }
 
-        if(Utils.isNullOrEmpty(systemMessages)){
-            return  null;
+        if (Utils.isNullOrEmpty(systemMessages)) {
+            return null;
         }
 
         return ((SystemMessage) systemMessages.get(0)).text();
 
     }
+
     public static List<Message> toOpenAiMessages(List<ChatMessage> messages) {
-         List<Message> aiMessages = messages.stream()
+        List<Message> aiMessages = messages.stream()
                 .filter(chatMessage -> !(chatMessage instanceof SystemMessage))
                 .map(InternalQianfanHelper::toQianfanMessage)
                 .collect(toList());
 
-         // ensure the length of messages is odd
-        if(aiMessages.size() == 0 || aiMessages.size() % 2 == 1){
+        // ensure the length of messages is odd
+        if (aiMessages.size() == 0 || aiMessages.size() % 2 == 1) {
             return aiMessages;
         }
 

@@ -14,7 +14,6 @@ import dev.langchain4j.model.qianfan.client.SyncOrAsyncOrStreaming;
 import dev.langchain4j.model.qianfan.client.chat.ChatCompletionRequest;
 import dev.langchain4j.model.qianfan.client.chat.ChatCompletionResponse;
 import dev.langchain4j.model.qianfan.spi.QianfanStreamingChatModelBuilderFactory;
-import lombok.Builder;
 
 import java.net.Proxy;
 import java.util.List;
@@ -25,11 +24,10 @@ import static dev.langchain4j.model.qianfan.InternalQianfanHelper.getSystemMessa
 import static dev.langchain4j.spi.ServiceHelper.loadFactories;
 
 /**
- *
  * see details here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu
  */
 
-public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
+public class QianfanStreamingChatModel implements StreamingChatLanguageModel {
 
     private final QianfanClient client;
 
@@ -41,11 +39,10 @@ public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
 
 
     private final String endpoint;
-    private  final Double penaltyScore;
+    private final Double penaltyScore;
 
     private final String responseFormat;
 
-    @Builder
     public QianfanStreamingChatModel(String baseUrl,
                                      String apiKey,
                                      String secretKey,
@@ -58,18 +55,18 @@ public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
                                      Boolean logRequests,
                                      Boolean logResponses,
                                      Proxy proxy
-                             ) {
-        if (Utils.isNullOrBlank(apiKey)||Utils.isNullOrBlank(secretKey)) {
+    ) {
+        if (Utils.isNullOrBlank(apiKey) || Utils.isNullOrBlank(secretKey)) {
             throw new IllegalArgumentException(" api key and secret key must be defined. It can be generated here: https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application");
         }
-        this.modelName=modelName;
-        this.endpoint=Utils.isNullOrBlank(endpoint)? QianfanChatModelNameEnum.getEndpoint(modelName):endpoint;
+        this.modelName = modelName;
+        this.endpoint = Utils.isNullOrBlank(endpoint) ? QianfanChatModelNameEnum.getEndpoint(modelName) : endpoint;
 
         if (Utils.isNullOrBlank(this.endpoint)) {
             throw new IllegalArgumentException("Qianfan is no such model name(or there is no model definition in the QianfanChatModelNameEnum class). You can see model name here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu");
         }
 
-        this.baseUrl = getOrDefault(baseUrl,  "https://aip.baidubce.com");
+        this.baseUrl = getOrDefault(baseUrl, "https://aip.baidubce.com");
         this.client = QianfanClient.builder()
                 .baseUrl(this.baseUrl)
                 .apiKey(apiKey)
@@ -84,7 +81,6 @@ public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
         this.responseFormat = responseFormat;
 
     }
-
 
 
     @Override
@@ -128,9 +124,9 @@ public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
         SyncOrAsyncOrStreaming<ChatCompletionResponse> response = client.chatCompletion(request, endpoint);
 
         response.onPartialResponse(partialResponse -> {
-            responseBuilder.append(partialResponse);
-            handle(partialResponse, handler);
-        })
+                    responseBuilder.append(partialResponse);
+                    handle(partialResponse, handler);
+                })
                 .onComplete(() -> {
                     Response<AiMessage> messageResponse = responseBuilder.build();
                     handler.onComplete(messageResponse);
@@ -158,9 +154,100 @@ public class QianfanStreamingChatModel implements StreamingChatLanguageModel  {
     }
 
     public static class QianfanStreamingChatModelBuilder {
+
+        private String baseUrl;
+        private String apiKey;
+        private String secretKey;
+        private Double temperature;
+        private Double topP;
+        private String modelName;
+        private String endpoint;
+        private String responseFormat;
+        private Double penaltyScore;
+        private Boolean logRequests;
+        private Boolean logResponses;
+        private Proxy proxy;
+
         public QianfanStreamingChatModelBuilder() {
             // This is public so it can be extended
             // By default with Lombok it becomes package private
+        }
+
+        public QianfanStreamingChatModelBuilder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder apiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder secretKey(String secretKey) {
+            this.secretKey = secretKey;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder temperature(Double temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder topP(Double topP) {
+            this.topP = topP;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder modelName(String modelName) {
+            this.modelName = modelName;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder endpoint(String endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder responseFormat(String responseFormat) {
+            this.responseFormat = responseFormat;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder penaltyScore(Double penaltyScore) {
+            this.penaltyScore = penaltyScore;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder logRequests(Boolean logRequests) {
+            this.logRequests = logRequests;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder logResponses(Boolean logResponses) {
+            this.logResponses = logResponses;
+            return this;
+        }
+
+        public QianfanStreamingChatModelBuilder proxy(Proxy proxy) {
+            this.proxy = proxy;
+            return this;
+        }
+
+        public QianfanStreamingChatModel build() {
+            return new QianfanStreamingChatModel(
+                    baseUrl,
+                    apiKey,
+                    secretKey,
+                    temperature,
+                    topP,
+                    modelName,
+                    endpoint,
+                    responseFormat,
+                    penaltyScore,
+                    logRequests,
+                    logResponses,
+                    proxy
+            );
         }
     }
 }

@@ -3,6 +3,7 @@ package dev.langchain4j.model.qianfan.client.completion;
 import java.util.List;
 
 public final class CompletionRequest {
+
     private final String prompt;
     private final Boolean stream;
     private final String userId;
@@ -14,6 +15,7 @@ public final class CompletionRequest {
     private final Double penaltyScore;
 
     private final List<String> stop;
+
     private CompletionRequest(Builder builder) {
         this.prompt = builder.prompt;
         this.stream = builder.stream;
@@ -25,36 +27,56 @@ public final class CompletionRequest {
         this.stop = builder.stop;
     }
 
-
-    public String prompt() {
+    public String getPrompt() {
         return this.prompt;
     }
 
-
-
-    public Boolean stream() {
+    public Boolean getStream() {
         return this.stream;
     }
 
+    public String getUserId() {
+        return userId;
+    }
 
+    public Double getTemperature() {
+        return temperature;
+    }
 
+    public Integer getTopK() {
+        return topK;
+    }
+
+    public Double getTopP() {
+        return topP;
+    }
+
+    public Double getPenaltyScore() {
+        return penaltyScore;
+    }
+
+    public List<String> getStop() {
+        return stop;
+    }
 
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
+
         private String prompt;
         private Boolean stream;
         private String userId;
 
-        private  Double temperature;
-        private  Integer topK;
+        private Double temperature;
+        private Integer topK;
 
-        private  Double topP;
-        private  Double penaltyScore;
+        private Double topP;
+        private Double penaltyScore;
 
-        private  List<String> stop;
+        private List<String> stop;
+
         private Builder() {
 
         }
@@ -85,7 +107,6 @@ public final class CompletionRequest {
             return this;
         }
 
-
         public Builder topP(Double topP) {
             this.topP = topP;
             return this;
@@ -95,6 +116,7 @@ public final class CompletionRequest {
             this.penaltyScore = penaltyScore;
             return this;
         }
+
         public Builder prompt(String prompt) {
             this.prompt = prompt;
             return this;

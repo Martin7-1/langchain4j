@@ -7,20 +7,18 @@ import dev.langchain4j.model.language.StreamingLanguageModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.qianfan.client.QianfanClient;
 import dev.langchain4j.model.qianfan.client.QianfanStreamingResponseBuilder;
-import dev.langchain4j.model.qianfan.client.completion.CompletionRequest;
 import dev.langchain4j.model.qianfan.client.SyncOrAsyncOrStreaming;
+import dev.langchain4j.model.qianfan.client.completion.CompletionRequest;
 import dev.langchain4j.model.qianfan.client.completion.CompletionResponse;
 import dev.langchain4j.model.qianfan.spi.QianfanStreamingLanguageModelBuilderFactory;
-import lombok.Builder;
+
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.spi.ServiceHelper.loadFactories;
 
 /**
- *
  * see details here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu
  */
 public class QianfanStreamingLanguageModel implements StreamingLanguageModel {
-
 
 
     private final QianfanClient client;
@@ -32,13 +30,13 @@ public class QianfanStreamingLanguageModel implements StreamingLanguageModel {
     private final String modelName;
 
 
-    private  final Double penaltyScore;
+    private final Double penaltyScore;
     private final Integer maxRetries;
 
     private final Integer topK;
 
     private final String endpoint;
-    @Builder
+
     public QianfanStreamingLanguageModel(String baseUrl,
                                          String apiKey,
                                          String secretKey,
@@ -51,19 +49,19 @@ public class QianfanStreamingLanguageModel implements StreamingLanguageModel {
                                          Double penaltyScore,
                                          Boolean logRequests,
                                          Boolean logResponses
-                             ) {
-        if (Utils.isNullOrBlank(apiKey)||Utils.isNullOrBlank(secretKey)) {
+    ) {
+        if (Utils.isNullOrBlank(apiKey) || Utils.isNullOrBlank(secretKey)) {
             throw new IllegalArgumentException(" api key and secret key must be defined. It can be generated here: https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application");
         }
 
-        this.modelName=modelName;
-        this.endpoint=Utils.isNullOrBlank(endpoint)? QianfanLanguageModelNameEnum.getEndpoint(modelName):endpoint;
+        this.modelName = modelName;
+        this.endpoint = Utils.isNullOrBlank(endpoint) ? QianfanLanguageModelNameEnum.getEndpoint(modelName) : endpoint;
 
-        if (Utils.isNullOrBlank(this.endpoint) ) {
+        if (Utils.isNullOrBlank(this.endpoint)) {
             throw new IllegalArgumentException("Qianfan is no such model name. You can see model name here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu");
         }
 
-        this.baseUrl = getOrDefault(baseUrl,  "https://aip.baidubce.com");
+        this.baseUrl = getOrDefault(baseUrl, "https://aip.baidubce.com");
 
         this.client = QianfanClient.builder()
                 .baseUrl(this.baseUrl)
@@ -110,6 +108,7 @@ public class QianfanStreamingLanguageModel implements StreamingLanguageModel {
 
 
     }
+
     private static void handle(CompletionResponse partialResponse,
                                StreamingResponseHandler<String> handler) {
         String result = partialResponse.getResult();
@@ -127,9 +126,95 @@ public class QianfanStreamingLanguageModel implements StreamingLanguageModel {
     }
 
     public static class QianfanStreamingLanguageModelBuilder {
+
+        private String baseUrl;
+        private String apiKey;
+        private String secretKey;
+        private Double temperature;
+        private Integer maxRetries;
+        private Integer topK;
+        private Double topP;
+        private String modelName;
+        private String endpoint;
+        private Double penaltyScore;
+        private Boolean logRequests;
+        private Boolean logResponses;
+
         public QianfanStreamingLanguageModelBuilder() {
             // This is public so it can be extended
             // By default with Lombok it becomes package private
+        }
+
+        public QianfanStreamingLanguageModelBuilder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder apiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder secretKey(String secretKey) {
+            this.secretKey = secretKey;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder temperature(Double temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder maxRetries(Integer maxRetries) {
+            this.maxRetries = maxRetries;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder topK(Integer topK) {
+            this.topK = topK;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder topP(Double topP) {
+            this.topP = topP;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder modelName(String modelName) {
+            this.modelName = modelName;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder endpoint(String endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder logRequests(Boolean logRequests) {
+            this.logRequests = logRequests;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModelBuilder logResponses(Boolean logResponses) {
+            this.logResponses = logResponses;
+            return this;
+        }
+
+        public QianfanStreamingLanguageModel build() {
+            return new QianfanStreamingLanguageModel(
+                    baseUrl,
+                    apiKey,
+                    secretKey,
+                    temperature,
+                    maxRetries,
+                    topK,
+                    topP,
+                    modelName,
+                    endpoint,
+                    penaltyScore,
+                    logRequests,
+                    logResponses
+            );
         }
     }
 }

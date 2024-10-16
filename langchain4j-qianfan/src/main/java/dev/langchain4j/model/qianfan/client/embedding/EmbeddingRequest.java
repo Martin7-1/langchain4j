@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class EmbeddingRequest {
+
     private final String model;
     private final List<String> input;
     private final String user;
@@ -16,15 +17,15 @@ public final class EmbeddingRequest {
         this.user = builder.user;
     }
 
-    public String model() {
+    public String getModel() {
         return this.model;
     }
 
-    public List<String> input() {
+    public List<String> getInput() {
         return this.input;
     }
 
-    public String user() {
+    public String getUser() {
         return this.user;
     }
 
@@ -70,8 +71,6 @@ public final class EmbeddingRequest {
             this.model = model;
             return this;
         }
-
-
 
         public Builder input(String... input) {
             return this.input(Arrays.asList(input));

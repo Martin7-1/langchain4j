@@ -31,9 +31,6 @@ public class Examples {
         return functionCall;
     }
 
-
-
-
     @Override
     public String toString() {
         return "Examples{" +

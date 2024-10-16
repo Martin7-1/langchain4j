@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.List;
+
 import static dev.langchain4j.agent.tool.JsonSchemaProperty.INTEGER;
 import static dev.langchain4j.data.message.ToolExecutionResultMessage.from;
 import static dev.langchain4j.data.message.UserMessage.userMessage;
@@ -29,9 +30,14 @@ class QianfanStreamingChatModelIT {
     private String apiKey = System.getenv("QIANFAN_API_KEY");
     private String secretKey = System.getenv("QIANFAN_SECRET_KEY");
 
-    QianfanStreamingChatModel model = QianfanStreamingChatModel.builder().modelName("ERNIE-Bot 4.0").temperature(0.7).topP(1.0)
+    QianfanStreamingChatModel model = QianfanStreamingChatModel.builder()
+            .modelName("ERNIE-Bot")
+            .temperature(0.7)
+            .topP(1.0)
             .apiKey(apiKey)
             .secretKey(secretKey)
+            .logRequests(true)
+            .logResponses(true)
             .build();
     ToolSpecification calculator = ToolSpecification.builder()
             .name("calculator")
@@ -41,16 +47,15 @@ class QianfanStreamingChatModelIT {
             .build();
 
 
+    @Test
+    void should_stream_answer() {
 
-  @Test
-    void should_stream_answer()  {
 
+        TestStreamingResponseHandler<AiMessage> handler = new TestStreamingResponseHandler<>();
 
-      TestStreamingResponseHandler<AiMessage> handler = new TestStreamingResponseHandler<>();
+        model.generate("Where is the capital of China? Please answer in English", handler);
 
-      model.generate("Where is the capital of China? Please answer in English", handler);
-
-      Response<AiMessage> response = handler.get();
+        Response<AiMessage> response = handler.get();
 
         assertThat(response.content().text()).containsIgnoringCase("Beijing");
         TokenUsage tokenUsage = response.tokenUsage();
@@ -117,7 +122,7 @@ class QianfanStreamingChatModelIT {
 
 
     @Test
-    void should_stream_valid_json()  {
+    void should_stream_valid_json() {
 
         //given
         String userMessage = "Return JSON with  fields: name of Klaus. ";

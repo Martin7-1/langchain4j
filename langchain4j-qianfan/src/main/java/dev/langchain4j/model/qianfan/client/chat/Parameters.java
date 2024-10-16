@@ -3,6 +3,7 @@ package dev.langchain4j.model.qianfan.client.chat;
 import java.util.*;
 
 public class Parameters {
+
     private final String type;
     private final Map<String, Map<String, Object>> properties;
     private final List<String> required;
@@ -13,16 +14,16 @@ public class Parameters {
         this.required = builder.required;
     }
 
-    public String type() {
-        return this.type;
+    public String getType() {
+        return type;
     }
 
-    public Map<String, Map<String, Object>> properties() {
-        return this.properties;
+    public Map<String, Map<String, Object>> getProperties() {
+        return properties;
     }
 
-    public List<String> required() {
-        return this.required;
+    public List<String> getRequired() {
+        return required;
     }
 
     public boolean equals(Object another) {
@@ -30,7 +31,7 @@ public class Parameters {
             return true;
         } else {
             return another instanceof Parameters
-                    && this.equalTo((Parameters)another);
+                    && this.equalTo((Parameters) another);
         }
     }
 

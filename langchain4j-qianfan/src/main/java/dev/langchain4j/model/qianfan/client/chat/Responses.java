@@ -3,6 +3,7 @@ package dev.langchain4j.model.qianfan.client.chat;
 import java.util.*;
 
 public class Responses {
+
     private final String type;
     private final Map<String, Map<String, Object>> properties;
 
@@ -25,7 +26,7 @@ public class Responses {
             return true;
         } else {
             return another instanceof Responses
-                    && this.equalTo((Responses)another);
+                    && this.equalTo((Responses) another);
         }
     }
 
@@ -41,7 +42,7 @@ public class Responses {
     }
 
     public String toString() {
-        return "Parameters{type=" + this.type + ", properties=" + this.properties +"}";
+        return "Parameters{type=" + this.type + ", properties=" + this.properties + "}";
     }
 
     public static Builder builder() {

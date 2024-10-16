@@ -1,44 +1,48 @@
 package dev.langchain4j.model.qianfan.client.chat;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import dev.langchain4j.model.qianfan.client.Json;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 
-public class FunctionCall<T> {
-    private static final Gson GSON = new Gson();
-    private static final Type MAP_TYPE = (new TypeToken<Map<String, Object>>() {
-    }).getType();
-    private final String name;
-    private final String thoughts;
-    private final String arguments;
+public class FunctionCall {
+
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
+    private String name;
+    private String thoughts;
+    private String arguments;
+
+    public FunctionCall() {
+    }
 
     private FunctionCall(Builder builder) {
         this.name = builder.name;
-        this.arguments = builder.arguments;
         this.thoughts = builder.thoughts;
+        this.arguments = builder.arguments;
     }
 
-    public String name() {
+    public String getName() {
         return this.name;
     }
 
-    public String thoughts() {
+    public String getThoughts() {
         return thoughts;
     }
 
-    public String arguments() {
+    public String getArguments() {
         return this.arguments;
     }
 
-    public Map<String, T> argumentsAsMap() {
-        return (Map)GSON.fromJson(this.arguments, MAP_TYPE);
+    @SuppressWarnings("unchecked")
+    public <T> Map<String, T> argumentsAsMap() {
+        return (Map<String, T>) Json.fromJson(this.arguments, MAP_TYPE);
     }
 
     public <T> T argument(String name) {
-        Map<String, T> arguments = (Map<String, T>) this.argumentsAsMap();
+        Map<String, T> arguments = this.argumentsAsMap();
         return arguments.get(name);
     }
 
@@ -47,12 +51,12 @@ public class FunctionCall<T> {
             return true;
         } else {
             return another instanceof FunctionCall
-                    && this.equalTo((FunctionCall)another);
+                    && this.equalTo((FunctionCall) another);
         }
     }
 
     private boolean equalTo(FunctionCall another) {
-        return Objects.equals(this.name, another.name) && Objects.equals(this.arguments, another.arguments)&& Objects.equals(this.thoughts, another.thoughts);
+        return Objects.equals(this.name, another.name) && Objects.equals(this.arguments, another.arguments) && Objects.equals(this.thoughts, another.thoughts);
     }
 
     @Override
@@ -78,9 +82,11 @@ public class FunctionCall<T> {
     }
 
     public static final class Builder {
+
         private String name;
         private String arguments;
         private String thoughts;
+
         private Builder() {
         }
 
@@ -93,10 +99,12 @@ public class FunctionCall<T> {
             this.arguments = arguments;
             return this;
         }
+
         public Builder thoughts(String thoughts) {
             this.thoughts = thoughts;
             return this;
         }
+
         public FunctionCall build() {
             return new FunctionCall(this);
         }

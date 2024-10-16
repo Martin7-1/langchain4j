@@ -8,7 +8,6 @@ import dev.langchain4j.model.qianfan.client.QianfanClient;
 import dev.langchain4j.model.qianfan.client.completion.CompletionRequest;
 import dev.langchain4j.model.qianfan.client.completion.CompletionResponse;
 import dev.langchain4j.model.qianfan.spi.QianfanLanguageModelBuilderFactory;
-import lombok.Builder;
 
 import java.net.Proxy;
 
@@ -20,11 +19,9 @@ import static dev.langchain4j.spi.ServiceHelper.loadFactories;
 
 
 /**
- *
  * see details here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu
  */
 public class QianfanLanguageModel implements LanguageModel {
-
 
 
     private final QianfanClient client;
@@ -36,13 +33,13 @@ public class QianfanLanguageModel implements LanguageModel {
     private final String modelName;
 
 
-    private  final Double penaltyScore;
+    private final Double penaltyScore;
     private final Integer maxRetries;
 
     private final Integer topK;
 
     private final String endpoint;
-    @Builder
+
     public QianfanLanguageModel(String baseUrl,
                                 String apiKey,
                                 String secretKey,
@@ -56,19 +53,19 @@ public class QianfanLanguageModel implements LanguageModel {
                                 Boolean logRequests,
                                 Boolean logResponses,
                                 Proxy proxy
-                             ) {
-        if (Utils.isNullOrBlank(apiKey)||Utils.isNullOrBlank(secretKey)) {
+    ) {
+        if (Utils.isNullOrBlank(apiKey) || Utils.isNullOrBlank(secretKey)) {
             throw new IllegalArgumentException(" api key and secret key must be defined. It can be generated here: https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application");
         }
 
-        this.modelName=modelName;
-        this.endpoint=Utils.isNullOrBlank(endpoint)? QianfanLanguageModelNameEnum.getEndpoint(modelName):endpoint;
+        this.modelName = modelName;
+        this.endpoint = Utils.isNullOrBlank(endpoint) ? QianfanLanguageModelNameEnum.getEndpoint(modelName) : endpoint;
 
-        if (Utils.isNullOrBlank(this.endpoint) ) {
+        if (Utils.isNullOrBlank(this.endpoint)) {
             throw new IllegalArgumentException("Qianfan is no such model name. You can see model name here: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu");
         }
 
-        this.baseUrl = getOrDefault(baseUrl,  "https://aip.baidubce.com");
+        this.baseUrl = getOrDefault(baseUrl, "https://aip.baidubce.com");
 
         this.client = QianfanClient.builder()
                 .baseUrl(this.baseUrl)
@@ -97,7 +94,7 @@ public class QianfanLanguageModel implements LanguageModel {
                 .build();
 
 
-        CompletionResponse response = withRetry(() -> client.completion(request,false,endpoint).execute(), maxRetries);
+        CompletionResponse response = withRetry(() -> client.completion(request, false, endpoint).execute(), maxRetries);
 
         return Response.from(
                 response.getResult(),
@@ -114,9 +111,107 @@ public class QianfanLanguageModel implements LanguageModel {
     }
 
     public static class QianfanLanguageModelBuilder {
+
+        private String baseUrl;
+        private String apiKey;
+        private String secretKey;
+        private Double temperature;
+        private Integer maxRetries;
+        private Integer topK;
+        private Double topP;
+        private String modelName;
+        private String endpoint;
+        private Double penaltyScore;
+        private Boolean logRequests;
+        private Boolean logResponses;
+        private Proxy proxy;
+
         public QianfanLanguageModelBuilder() {
             // This is public so it can be extended
             // By default with Lombok it becomes package private
+        }
+
+        public QianfanLanguageModelBuilder baseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder apiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder secretKey(String secretKey) {
+            this.secretKey = secretKey;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder temperature(Double temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder maxRetries(Integer maxRetries) {
+            this.maxRetries = maxRetries;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder topK(Integer topK) {
+            this.topK = topK;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder topP(Double topP) {
+            this.topP = topP;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder modelName(String modelName) {
+            this.modelName = modelName;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder endpoint(String endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder penaltyScore(Double penaltyScore) {
+            this.penaltyScore = penaltyScore;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder logRequests(Boolean logRequests) {
+            this.logRequests = logRequests;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder logResponses(Boolean logResponses) {
+            this.logResponses = logResponses;
+            return this;
+        }
+
+        public QianfanLanguageModelBuilder proxy(Proxy proxy) {
+            this.proxy = proxy;
+            return this;
+        }
+
+        public QianfanLanguageModel build() {
+            return new QianfanLanguageModel(
+                    baseUrl,
+                    apiKey,
+                    secretKey,
+                    temperature,
+                    maxRetries,
+                    topK,
+                    topP,
+                    modelName,
+                    endpoint,
+                    penaltyScore,
+                    logRequests,
+                    logResponses,
+                    proxy
+            );
         }
     }
 }

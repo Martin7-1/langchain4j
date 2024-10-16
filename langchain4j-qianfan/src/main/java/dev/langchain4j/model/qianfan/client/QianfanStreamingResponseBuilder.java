@@ -40,7 +40,6 @@ public class QianfanStreamingResponseBuilder {
     private Integer outputTokenCount;
 
 
-
     public QianfanStreamingResponseBuilder(Integer inputTokenCount) {
         this.inputTokenCount = inputTokenCount;
     }
@@ -65,9 +64,9 @@ public class QianfanStreamingResponseBuilder {
 
         Usage usage = partialResponse.getUsage();
 
-        if (usage!=null){
-            inputTokenCount = usage.promptTokens();
-            outputTokenCount = usage.completionTokens();
+        if (usage != null) {
+            inputTokenCount = usage.getPromptTokens();
+            outputTokenCount = usage.getCompletionTokens();
         }
 
 
@@ -76,12 +75,12 @@ public class QianfanStreamingResponseBuilder {
         if (functionCall != null) {
 
 
-            if (functionCall.name() != null) {
-                toolNameBuilder.append(functionCall.name());
+            if (functionCall.getName() != null) {
+                toolNameBuilder.append(functionCall.getName());
             }
 
-            if (functionCall.arguments() != null) {
-                toolArgumentsBuilder.append(functionCall.arguments());
+            if (functionCall.getArguments() != null) {
+                toolArgumentsBuilder.append(functionCall.getArguments());
             }
         }
 

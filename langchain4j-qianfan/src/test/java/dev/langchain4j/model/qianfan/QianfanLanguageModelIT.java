@@ -15,10 +15,14 @@ class QianfanLanguageModelIT {
     private String apiKey = System.getenv("QIANFAN_API_KEY");
     private String secretKey = System.getenv("QIANFAN_SECRET_KEY");
 
-    QianfanLanguageModel model = QianfanLanguageModel.builder().endpoint("codellama_7b_instruct").topP(1.0).maxRetries(1)
+    QianfanLanguageModel model = QianfanLanguageModel.builder()
+            .endpoint("codellama_7b_instruct")
+            .topP(1.0)
+            .maxRetries(1)
             .apiKey(apiKey)
             .secretKey(secretKey)
-
+            .logRequests(true)
+            .logResponses(true)
             .build();
 
     @Test

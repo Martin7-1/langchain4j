@@ -18,7 +18,6 @@ public final class ChatCompletionRequest {
     private final String system;
     private final List<String> stop;
     private final Integer maxOutputTokens;
-
     private final String responseFormat;
 
     private ChatCompletionRequest(Builder builder) {
@@ -32,44 +31,52 @@ public final class ChatCompletionRequest {
         this.system = builder.system;
         this.responseFormat = builder.responseFormat;
         this.stop = builder.stop;
-        this.maxOutputTokens=builder.maxOutputTokens;
+        this.maxOutputTokens = builder.maxOutputTokens;
     }
 
-
-    public List<Message> messages() {
-        return this.messages;
+    public List<Message> getMessages() {
+        return messages;
     }
 
-    public Double temperature() {
-        return this.temperature;
+    public Double getTemperature() {
+        return temperature;
     }
 
-
-    public Double topP() {
-        return this.topP;
+    public Double getTopP() {
+        return topP;
     }
 
-    public Boolean stream() {
-        return this.stream;
-    }
-    public String system() {
-        return this.system;
+    public Boolean getStream() {
+        return stream;
     }
 
-
-    public Double penaltyScore() {
-        return this.penaltyScore;
+    public Double getPenaltyScore() {
+        return penaltyScore;
     }
 
-
-    public String userId() {
-        return this.userId;
+    public String getUserId() {
+        return userId;
     }
 
-    public List<Function> functions() {
-        return this.functions;
+    public List<Function> getFunctions() {
+        return functions;
     }
 
+    public String getSystem() {
+        return system;
+    }
+
+    public List<String> getStop() {
+        return stop;
+    }
+
+    public Integer getMaxOutputTokens() {
+        return maxOutputTokens;
+    }
+
+    public String getResponseFormat() {
+        return responseFormat;
+    }
 
     @Override
     public String toString() {
@@ -101,11 +108,12 @@ public final class ChatCompletionRequest {
         private Double penaltyScore;
         private String userId;
         private List<Function> functions;
-        private  String system;
+        private String system;
 
-        private  String responseFormat;
-        private  List<String> stop;
-        private  Integer maxOutputTokens;
+        private String responseFormat;
+        private List<String> stop;
+        private Integer maxOutputTokens;
+
         private Builder() {
         }
 
@@ -122,7 +130,6 @@ public final class ChatCompletionRequest {
             this.responseFormat(instance.responseFormat);
             return this;
         }
-
 
 
         public Builder messages(List<Message> messages) {
@@ -177,14 +184,17 @@ public final class ChatCompletionRequest {
             this.temperature = temperature;
             return this;
         }
+
         public Builder system(String system) {
             this.system = system;
             return this;
         }
+
         public Builder maxOutputTokens(Integer maxOutputTokens) {
             this.maxOutputTokens = maxOutputTokens;
             return this;
         }
+
         public Builder stop(List<String> stop) {
             this.stop = stop;
             return this;
@@ -194,7 +204,6 @@ public final class ChatCompletionRequest {
             this.responseFormat = responseFormat;
             return this;
         }
-
 
 
         public Builder topP(Double topP) {

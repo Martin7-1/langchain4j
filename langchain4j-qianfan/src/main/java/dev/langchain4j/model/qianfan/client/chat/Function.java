@@ -1,7 +1,6 @@
 package dev.langchain4j.model.qianfan.client.chat;
 
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,28 +21,25 @@ public class Function {
         this.responses = builder.responses;
     }
 
-
-    public String name() {
-        return this.name;
+    public String getName() {
+        return name;
     }
 
-    public String description() {
-        return this.description;
+    public String getDescription() {
+        return description;
     }
 
-    public Parameters parameters() {
-        return this.parameters;
+    public Parameters getParameters() {
+        return parameters;
     }
 
-    public Responses responses() {
+    public Responses getResponses() {
         return responses;
     }
 
-    public Examples examples() {
+    public Examples getExamples() {
         return examples;
     }
-
-
 
     @Override
     public String toString() {
@@ -88,7 +84,7 @@ public class Function {
 
         public Builder addParameter(String name, JsonSchemaProperty... jsonSchemaProperties) {
             this.addOptionalParameter(name, jsonSchemaProperties);
-            this.parameters.required().add(name);
+            this.parameters.getRequired().add(name);
             return this;
         }
 
@@ -106,7 +102,7 @@ public class Function {
                 jsonSchemaPropertiesMap.put(jsonSchemaProperty.key(), jsonSchemaProperty.value());
             }
 
-            this.parameters.properties().put(name, jsonSchemaPropertiesMap);
+            this.parameters.getProperties().put(name, jsonSchemaPropertiesMap);
             return this;
         }
 

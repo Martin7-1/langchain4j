@@ -3,6 +3,7 @@ package dev.langchain4j.model.qianfan.client.chat;
 import java.util.Objects;
 
 public final class Message {
+
     private final Role role;
     private final String content;
     private final String name;
@@ -15,27 +16,27 @@ public final class Message {
         this.functionCall = builder.functionCall;
     }
 
-    public Role role() {
-        return this.role;
+    public Role getRole() {
+        return role;
     }
 
-    public String content() {
-        return this.content;
+    public String getContent() {
+        return content;
     }
 
-    public String name() {
-        return this.name;
+    public String getName() {
+        return name;
     }
 
-    public FunctionCall functionCall() {
-        return this.functionCall;
+    public FunctionCall getFunctionCall() {
+        return functionCall;
     }
 
     public boolean equals(Object another) {
         if (this == another) {
             return true;
         } else {
-            return another instanceof Message && this.equalTo((Message)another);
+            return another instanceof Message && this.equalTo((Message) another);
         }
     }
 

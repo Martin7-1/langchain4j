@@ -4,6 +4,7 @@ package dev.langchain4j.model.qianfan.client.chat;
 import java.util.Objects;
 
 public class JsonSchemaProperty {
+
     public static final JsonSchemaProperty STRING = type("string");
     public static final JsonSchemaProperty NUMBER = type("number");
     public static final JsonSchemaProperty OBJECT = type("object");
