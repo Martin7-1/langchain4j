@@ -87,6 +87,18 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
     private final String indexName;
     private final MongoDbConfiguration configuration;
 
+    /**
+     * Creates an instance of MongoDbEmbeddingStore.
+     *
+     * @param mongoClient             MongoDB client. Please close the client to release resources after usage.
+     * @param databaseName            MongoDB database name.
+     * @param collectionName          MongoDB collection name.
+     * @param indexName               MongoDB Atlas Vector Search Index name.
+     * @param createCollectionOptions Options to create MongoDB collection.
+     * @param indexMapping            MongoDB Atlas index mapping.
+     * @param createIndex             Whether to create Atlas Vector Search Index or not.
+     * @param configuration           MongoDB configuration to use (ANN or ENN)
+     */
     public MongoDbEmbeddingStore(
             MongoClient mongoClient,
             String databaseName,

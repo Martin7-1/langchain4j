@@ -21,18 +21,25 @@ import java.util.List;
 import org.bson.conversions.Bson;
 
 /**
- * TODO: javadoc
+ * Represent MongoDB Atlas search configuration. For now, langchain4j support following configuration:
+ *
+ * <ul>
+ *     <li>{@link MongoDbConfigurationANN}</li>
+ *     <li>{@link MongoDbConfigurationENN}</li>
+ * </ul>
+ * <p>
+ * Users can implement this interface to support custom search configuration.
  */
 public interface MongoDbConfiguration {
 
     /**
-     * TODO: javadoc
+     * Performing vector search on MongoDB collection.
      *
-     * @param collection
-     * @param indexName
-     * @param request
-     * @return
-     * @throws MongoCommandException
+     * @param collection MongoDB collection.
+     * @param indexName  Index name for searching. Currently, the index represents Atlas Vector Search Index.
+     * @param request    Search request.
+     * @return MongoDB searched results.
+     * @throws MongoCommandException if MongoDB failed to obtain searched results.
      */
     default AggregateIterable<MongoDbMatchedDocument> internalSearch(
             MongoCollection<MongoDbDocument> collection, String indexName, EmbeddingSearchRequest request)
@@ -65,10 +72,12 @@ public interface MongoDbConfiguration {
     }
 
     /**
-     * TODO: javadoc
+     * Obtain vector search options based on the request.
      *
-     * @param request
-     * @return
+     * @param request Search request.
+     * @return Vector search options.
      */
-    VectorSearchOptions vectorSearchOptions(EmbeddingSearchRequest request);
+    default VectorSearchOptions vectorSearchOptions(EmbeddingSearchRequest request) {
+        throw new UnsupportedOperationException("This configuration do not have proper vector search options.");
+    }
 }

@@ -7,6 +7,11 @@ import com.mongodb.client.model.search.VectorSearchOptions;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import org.bson.conversions.Bson;
 
+/**
+ * Represents ANN(Approximate Nearest Neighbor) search using Atlas Vector Search Index.
+ *
+ * <p>For more details, see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">MongoDB docs</a></p>
+ */
 public class MongoDbConfigurationANN implements MongoDbConfiguration {
 
     private final long maxResultRatio;
