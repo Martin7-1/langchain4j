@@ -1,5 +1,6 @@
 package dev.langchain4j.store.embedding.mongodb;
 
+import static com.mongodb.client.model.SearchIndexType.vectorSearch;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 import static dev.langchain4j.internal.Utils.randomUUID;
@@ -7,8 +8,8 @@ import static dev.langchain4j.internal.ValidationUtils.ensureNotEmpty;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 import static dev.langchain4j.internal.ValidationUtils.ensureTrue;
 import static dev.langchain4j.store.embedding.mongodb.IndexMapping.defaultIndexMapping;
-import static dev.langchain4j.store.embedding.mongodb.MappingUtils.fromIndexMapping;
 import static dev.langchain4j.store.embedding.mongodb.MappingUtils.toMongoDbDocument;
+import static dev.langchain4j.store.embedding.mongodb.MappingUtils.toVectorSearchFields;
 import static dev.langchain4j.store.embedding.mongodb.MongoDbMetadataFilterMapper.map;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -42,6 +43,7 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +86,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
     private static final Logger log = LoggerFactory.getLogger(MongoDbEmbeddingStore.class);
 
     private final MongoCollection<MongoDbDocument> collection;
-    private final String indexName;
+    private final String vectorSearchIndexName;
     private final MongoDbConfiguration configuration;
 
     /**
@@ -93,25 +95,25 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
      * @param mongoClient             MongoDB client. Please close the client to release resources after usage.
      * @param databaseName            MongoDB database name.
      * @param collectionName          MongoDB collection name.
-     * @param indexName               MongoDB Atlas Vector Search Index name.
+     * @param vectorSearchIndexName   MongoDB Atlas Vector Search Index name.
      * @param createCollectionOptions Options to create MongoDB collection.
      * @param indexMapping            MongoDB Atlas index mapping.
-     * @param createIndex             Whether to create Atlas Vector Search Index or not.
+     * @param createVectorSearchIndex Whether to create Atlas Vector Search Index or not.
      * @param configuration           MongoDB configuration to use (ANN or ENN)
      */
     public MongoDbEmbeddingStore(
             MongoClient mongoClient,
             String databaseName,
             String collectionName,
-            String indexName,
+            String vectorSearchIndexName,
             CreateCollectionOptions createCollectionOptions,
             IndexMapping indexMapping,
-            Boolean createIndex,
-            MongoDbConfiguration configuration) {
+            Boolean createVectorSearchIndex,
+            @NonNull MongoDbConfiguration configuration) {
         databaseName = ensureNotNull(databaseName, "databaseName");
         collectionName = ensureNotNull(collectionName, "collectionName");
-        createIndex = getOrDefault(createIndex, false);
-        this.indexName = ensureNotNull(indexName, "indexName");
+        createVectorSearchIndex = getOrDefault(createVectorSearchIndex, false);
+        this.vectorSearchIndexName = ensureNotNull(vectorSearchIndexName, "indexName");
 
         CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                 .register(MongoDbDocument.class, MongoDbMatchedDocument.class)
@@ -129,15 +131,22 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                 database.getCollection(collectionName, MongoDbDocument.class).withCodecRegistry(codecRegistry);
         this.configuration = configuration;
 
-        if (!indexExists(this.indexName)) {
-            if (createIndex) {
-                createIndex(this.indexName, getOrDefault(indexMapping, defaultIndexMapping()));
+        if (!indexExists(this.collection, this.vectorSearchIndexName)) {
+            if (createVectorSearchIndex) {
+                createIndex(
+                        this.collection,
+                        this.vectorSearchIndexName,
+                        toVectorSearchFields(getOrDefault(indexMapping, defaultIndexMapping())),
+                        vectorSearch());
             } else {
                 throw new RuntimeException(String.format(
-                        "Search Index '%s' not found and must be created via createIndex(true), or manually as a vector search index (not a regular index), via the createSearchIndexes command",
-                        this.indexName));
+                        "Vector Search Index '%s' not found and must be created via builder().createVectorSearchIndex(true), or manually as a vector search index (not a regular index), via the createSearchIndexes command",
+                        this.vectorSearchIndexName));
             }
         }
+
+        // post-setup for configuration
+        configuration.additionalSetup(this.collection);
     }
 
     @Deprecated
@@ -145,7 +154,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
             MongoClient mongoClient,
             String databaseName,
             String collectionName,
-            String indexName,
+            String vectorSearchIndexName,
             Long maxResultRatio,
             CreateCollectionOptions createCollectionOptions,
             Bson filter,
@@ -156,7 +165,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                 mongoClient,
                 databaseName,
                 collectionName,
-                indexName,
+                vectorSearchIndexName,
                 createCollectionOptions,
                 indexMapping,
                 createIndex,
@@ -176,7 +185,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         private MongoClient mongoClient;
         private String databaseName;
         private String collectionName;
-        private String indexName;
+        private String vectorSearchIndexName;
         private Long maxResultRatio;
         private CreateCollectionOptions createCollectionOptions;
         private Bson filter;
@@ -185,10 +194,10 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         /**
          * Whether MongoDB Atlas is deployed in cloud
          *
-         * <p>if true, you need to create index in <a href="https://cloud.mongodb.com/">MongoDB Atlas</a></p>
+         * <p>if true, you need to create Atlas Vector Search Index in <a href="https://cloud.mongodb.com/">MongoDB Atlas</a></p>
          * <p>if false, {@link MongoDbEmbeddingStore} will create collection and index automatically</p>
          */
-        private Boolean createIndex;
+        private Boolean createVectorSearchIndex;
 
         /**
          * Build Mongo Client, Please close the client to release resources after usage
@@ -208,8 +217,29 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
             return this;
         }
 
+        /**
+         * Set the name of Atlas Vector Search Index.
+         *
+         * @param indexName The name of Atlas Vector Search Index
+         * @return builder
+         * @see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">Atlas Vector Search Index</a>
+         * @deprecated Using {@link Builder#vectorSearchIndexName(String)} instead for clearer semantics.
+         */
+        @Deprecated(forRemoval = true)
         public Builder indexName(String indexName) {
-            this.indexName = indexName;
+            this.vectorSearchIndexName = indexName;
+            return this;
+        }
+
+        /**
+         * Set the name of Atlas Vector Search Index.
+         *
+         * @param vectorSearchIndexName The name of Atlas Vector Search Index
+         * @return builder
+         * @see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">Atlas Vector Search Index</a>
+         */
+        public Builder vectorSearchIndexName(String vectorSearchIndexName) {
+            this.vectorSearchIndexName = vectorSearchIndexName;
             return this;
         }
 
@@ -222,7 +252,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
          * @return builder
          * @deprecated Using {@link Builder#configuration(MongoDbConfiguration)} to manually set search configuration instead.
          */
-        @Deprecated
+        @Deprecated(forRemoval = true)
         public Builder maxResultRatio(Long maxResultRatio) {
             this.maxResultRatio = maxResultRatio;
             return this;
@@ -247,7 +277,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
          * @return builder
          * @deprecated Using {@link Builder#configuration(MongoDbConfiguration)} to manually set search configuration instead.
          */
-        @Deprecated
+        @Deprecated(forRemoval = true)
         public Builder filter(Bson filter) {
             this.filter = filter;
             return this;
@@ -256,7 +286,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         /**
          * set MongoDB search index fields mapping
          *
-         * <p>if {@link Builder#createIndex} is true, then indexMapping not work</p>
+         * <p>if {@link Builder#createVectorSearchIndex} is true, then indexMapping not work</p>
          *
          * @param indexMapping MongoDB search index fields mapping
          * @return builder
@@ -267,15 +297,36 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
 
         /**
-         * Set whether in production mode, production mode will not create index automatically
+         * Whether to create Atlas Vector Search Index or not.
+         *
+         * <p>If you are in production code, we recommend you to set it to false and create Atlas Vector Search Index manually.</p>
          *
          * <p>default value is false</p>
          *
-         * @param createIndex whether in production mode
+         * @param createIndex Whether to create Atlas Vector Search Index or not.
          * @return builder
+         * @see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">Atlas Vector Search Index</a>
+         * @deprecated Using {@link Builder#createVectorSearchIndex(Boolean)} instead for clearer semantics.
          */
+        @Deprecated(forRemoval = true)
         public Builder createIndex(Boolean createIndex) {
-            this.createIndex = createIndex;
+            this.createVectorSearchIndex = createIndex;
+            return this;
+        }
+
+        /**
+         * Whether to create Atlas Vector Search Index or not.
+         *
+         * <p>If you are in production code, we recommend you to set it to false and create Atlas Vector Search Index manually.</p>
+         *
+         * <p>default value is false</p>
+         *
+         * @param createVectorSearchIndex Whether to create Atlas Vector Search Index or not.
+         * @return builder
+         * @see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">Atlas Vector Search Index</a>
+         */
+        public Builder createVectorSearchIndex(Boolean createVectorSearchIndex) {
+            this.createVectorSearchIndex = createVectorSearchIndex;
             return this;
         }
 
@@ -303,10 +354,10 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                         mongoClient,
                         databaseName,
                         collectionName,
-                        indexName,
+                        vectorSearchIndexName,
                         createCollectionOptions,
                         indexMapping,
-                        createIndex,
+                        createVectorSearchIndex,
                         configuration);
             }
             // For backward compatibility
@@ -314,12 +365,12 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                     mongoClient,
                     databaseName,
                     collectionName,
-                    indexName,
+                    vectorSearchIndexName,
                     maxResultRatio,
                     createCollectionOptions,
                     filter,
                     indexMapping,
-                    createIndex);
+                    createVectorSearchIndex);
         }
     }
 
@@ -370,7 +421,7 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
     public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
         try {
             AggregateIterable<MongoDbMatchedDocument> results =
-                    configuration.internalSearch(collection, indexName, request);
+                    configuration.internalSearch(collection, vectorSearchIndexName, request);
             List<EmbeddingMatch<TextSegment>> result = StreamSupport.stream(results.spliterator(), false)
                     .map(MappingUtils::toEmbeddingMatch)
                     .collect(toList());
@@ -422,7 +473,15 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
         database.createCollection(collectionName, createCollectionOptions);
     }
 
-    private boolean indexExists(String indexName) {
+    /**
+     * Check whether the index exists or not.
+     *
+     * <p>package-private for reuse.</p>
+     *
+     * @param indexName Index name to check exist.
+     * @return true if the index exists, false otherwise.
+     */
+    static boolean indexExists(MongoCollection<MongoDbDocument> collection, String indexName) {
         Document indexRecord = indexRecord(collection, indexName);
         return indexRecord != null && !indexRecord.getString("status").equals("DOES_NOT_EXIST");
     }
@@ -434,9 +493,19 @@ public class MongoDbEmbeddingStore implements EmbeddingStore<TextSegment> {
                 .orElse(null);
     }
 
-    private void createIndex(String indexName, IndexMapping indexMapping) {
-        collection.createSearchIndexes(List.of(
-                new SearchIndexModel(indexName, fromIndexMapping(indexMapping), SearchIndexType.vectorSearch())));
+    /**
+     * Create index (Atlas Search Index or Atlas Vector Search Index).
+     *
+     * @param indexName       Index name to create.
+     * @param mapping         mapping definition.
+     * @param searchIndexType Index type. (Vector Search or Search)
+     */
+    static void createIndex(
+            MongoCollection<MongoDbDocument> collection,
+            String indexName,
+            Document mapping,
+            SearchIndexType searchIndexType) {
+        collection.createSearchIndexes(List.of(new SearchIndexModel(indexName, mapping, searchIndexType)));
 
         waitForIndex(collection, indexName);
     }

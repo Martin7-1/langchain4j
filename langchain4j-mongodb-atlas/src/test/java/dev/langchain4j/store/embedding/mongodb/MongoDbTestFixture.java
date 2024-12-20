@@ -106,15 +106,19 @@ final class MongoDbTestFixture {
                 .fromClient(client)
                 .databaseName(DATABASE_NAME)
                 .collectionName(collectionName)
-                .indexName("test_index")
+                .vectorSearchIndexName(vectorSearchIndexName())
                 .indexMapping(indexMapping)
                 .configuration(configuration)
-                .createIndex(true);
+                .createVectorSearchIndex(true);
     }
 
     void afterTests() {
         getDatabase().getCollection(collectionName).drop();
         client.close();
+    }
+
+    String vectorSearchIndexName() {
+        return "test_vector_search_index";
     }
 
     MongoDatabase getDatabase() {

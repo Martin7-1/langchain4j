@@ -80,4 +80,6 @@ public interface MongoDbConfiguration {
     default VectorSearchOptions vectorSearchOptions(EmbeddingSearchRequest request) {
         throw new UnsupportedOperationException("This configuration do not have proper vector search options.");
     }
+
+    default void additionalSetup(MongoCollection<MongoDbDocument> collection) {}
 }

@@ -10,9 +10,15 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreWithFilteringIT;
 import org.junit.jupiter.api.AfterEach;
 
-class MongoDbEmbeddingStoreENNIT extends EmbeddingStoreWithFilteringIT {
+/**
+ * TODO
+ */
+class MongoDbEmbeddingStoreHybridIT extends EmbeddingStoreWithFilteringIT {
     private MongoDbTestFixture fixture = new MongoDbTestFixture(createClient())
-            .initializeWithConfiguration(MongoDbConfigurationENN.builder().build());
+            .initializeWithConfiguration(MongoDbConfigurationHybrid.builder()
+                    .createSearchIndex(true)
+                    .searchIndexName("test_search_index")
+                    .build());
 
     MongoClient createClient() {
         return createDefaultClient();

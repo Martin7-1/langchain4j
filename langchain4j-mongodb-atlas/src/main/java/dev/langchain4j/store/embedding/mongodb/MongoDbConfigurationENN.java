@@ -3,6 +3,7 @@ package dev.langchain4j.store.embedding.mongodb;
 import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
 
 import com.mongodb.client.model.search.VectorSearchOptions;
+import dev.langchain4j.Experimental;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import org.bson.conversions.Bson;
 
@@ -19,6 +20,7 @@ import org.bson.conversions.Bson;
  *
  * <p>For more details, see <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/">MongoDB docs</a></p>
  */
+@Experimental
 public class MongoDbConfigurationENN implements MongoDbConfiguration {
 
     private final Bson globalPrefilter;

@@ -84,7 +84,7 @@ class MongoDbEmbeddingStoreMiscIT {
             fixture = fixture.initialize(builder -> builder.createIndex(false));
             fail("Expected exception");
         } catch (RuntimeException r) {
-            assertTrue(r.getMessage().contains("Search Index 'test_index' not found"));
+            assertTrue(r.getMessage().contains("Search Index '%s' not found".formatted(fixture.vectorSearchIndexName())));
         }
     }
 }
